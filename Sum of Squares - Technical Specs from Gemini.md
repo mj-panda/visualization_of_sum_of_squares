@@ -3,56 +3,49 @@
 ## 1. Objective & Scene Setup
 * **Target Engine:** Manim (Community Edition)
 * **Class Name:** `SumOfSquaresProof`
+* **Renderer Configuration:** Use the default CPU-based **Cairo** renderer (without `--renderer=opengl`) to ensure perfect 3D depth-sorting culling and reliable output movie generation on disk.
 * **Camera Configuration:** Initialize the scene in a 3D environment. Set default orientation to `phi = 70 * DEGREES`, `theta = -30 * DEGREES` to give a clear volumetric perspective.
-* **Variable Definition:** Set a global parameter $N = 4$ for the visualization scale.
+* **Variable Definition:** Set a global parameter $N = 3$ (or $N = 4$) for the visualization scale.
 
 ---
 
 ## 2. Component Design & Object Generation
-Create a parameter-driven factory method `get_pyramid(color_gradient_list)` that constructs a single jagged pyramid representing $\sum_{k=1}^{N} k^2$.
+Create a parameter-driven factory method `get_base_pyramid()` that constructs a single corner-aligned stepped pyramid representing $\sum_{k=1}^{N} k^2$.
 
-* **Block Primitive:** Use `Cube(side_length=1.0)`. Set stroke thickness to `1.5` with a darker shade of the base color to ensure definition between interlocking block edges.
-* **Layer Loops:** For each layer $k$ from $1$ to $N$:
+* **Block Primitive:** Use `Cube(side_length=1.0)`. 
+  * Enforce **`fill_opacity=1.0`** to eliminate transparency depth-sorting glitches in 3D.
+  * Set a solid black stroke border (`color=BLACK`, `width=2.0`, `opacity=1.0`) to cleanly distinguish individual block divisions.
+* **Pyramid Coordinates:** For each layer $k$ from $1$ to $N$:
   * Generate a grid of cubes spanning $i \in [0, k-1]$ and $j \in [0, k-1]$.
-  * Position each cube at 3D coordinate $(j, -i, -k)$. 
-  * *Rationale:* This anchors the top corner of every pyramid copy strictly at the local origin $(0,0,-1)$, creating a predictable pivot point for subsequent transformations.
-* **Color Schemes:** Instantiate three distinct copies with high-contrast color palettes:
-  * **Pyramid A:** Deep Blue to Cyan gradient (`BLUE_E` to `BLUE_A`)
-  * **Pyramid B:** Emerald to Mint gradient (`GREEN_E` to `GREEN_A`)
-  * **Pyramid C:** Crimson to Coral gradient (`RED_E` to `RED_A`)
+  * Position each cube at 3D integer coordinate $(j, i, k-1)$.
+* **Color Scheme:** Use 6 distinct, vibrant, high-contrast colors to easily visualize the 6 individual interlocking pyramids:
+  * `RED_E`, `BLUE_E`, `GREEN_E`, `YELLOW_E`, `PURPLE_E`, `ORANGE`
 
 ---
 
-## 3. Transformation and Interlocking Logic (Phase Mappings)
-To form the final $N \times (N+1) \times (N + \frac{1}{2})$ rectangular cuboid, the script must execute the following sequential spatial states:
+## 3. Transformation and Interlocking Logic (Exact Cover Partition)
+To form a mathematically flawless, 100% solid, gap-free $N \times (N+1) \times (2N+1)$ rectangular cuboid, the script executes a perfect spatial tiling partition. 
 
-### State 1: Initial Spawning
-* **Pyramid A:** Positioned at center-left (`SHIFT(LEFT * 4)`).
-* **Pyramid B:** Positioned at center (`SHIFT(ORIGIN)`).
-* **Pyramid C:** Positioned at center-right (`SHIFT(RIGHT * 4)`).
-* *Action:* Fade all three structures in simultaneously over 2 seconds.
+### Exact Coordinate Mappings (for $N=3$):
+The 6 step-pyramids are created directly in their final tight interlocking configurations by applying specific $3 \times 3$ rotation matrices and discrete coordinate offsets derived from an exact-cover backtracking solver:
 
-### State 2: Preparation for Interlocking (Rotation)
-Before translation, Pyramids B and C must reorient to complement the stepped facets of Pyramid A:
-* **Pyramid A:** Remains static.
-* **Pyramid B Transformation:** Rotate $180^\circ$ around the X-axis, followed by a $90^\circ$ rotation around the Z-axis.
-* **Pyramid C Transformation:** Rotate $90^\circ$ around the Y-axis, followed by a $180^\circ$ rotation around the Z-axis.
+1. **Pyramid 1 (Red)**: Rotation: `[[-1, 0, 0], [0, -1, 0], [0, 0, 1]]`, Offset: `(0, 1, 4)`
+2. **Pyramid 2 (Blue)**: Rotation: `[[1, 0, 0], [0, 0, 1], [0, -1, 0]]`, Offset: `(0, 1, 0)`
+3. **Pyramid 3 (Green)**: Rotation: `[[0, 1, 0], [1, 0, 0], [0, 0, -1]]`, Offset: `(0, 0, 0)`
+4. **Pyramid 4 (Yellow)**: Rotation: `[[0, -1, 0], [0, 0, -1], [1, 0, 0]]`, Offset: `(0, 0, 4)`
+5. **Pyramid 5 (Purple)**: Rotation: `[[0, 0, -1], [-1, 0, 0], [0, 1, 0]]`, Offset: `(0, 1, 3)`
+6. **Pyramid 6 (Orange)**: Rotation: `[[0, 0, 1], [0, 1, 0], [-1, 0, 0]]`, Offset: `(0, 0, 1)`
 
-### State 3: Final Assembly (Translation)
-Animate the smooth sliding of the structures into a unified, tight rectangular block at the center of the screen (`ORIGIN`):
-* **Pyramid A Target:** Move to `ORIGIN`.
-* **Pyramid B Target:** Shift by vector offsets exactly matching the inverted dimensions so its ceiling steps interlock with Pyramid A's floor steps.
-* **Pyramid C Target:** Shift diagonally into the remaining wedge-shaped void along the side of the combined A-B structure.
-* *Action:* Use `self.play(MoveToTarget(...))` with a `linear` or `smooth` rate modifier over 3 seconds to show the parts fitting perfectly without clipping.
+### Animation States:
+1. **State 1: Single Pyramid**: Spawn the first corner-aligned step pyramid at the origin to establish the geometry.
+2. **State 2: Radial Separation (Explosion)**: Duplicate the pyramid 5 times. Center the entire unified $6$-pyramid block at `ORIGIN` and scale it down to `0.35` so the entire assembly fits on screen. Explode all 6 pyramids radially outward by a controlled distance of `2.2` units so they start visibly separated but fully contained inside the camera frame.
+3. **State 3: Slow Assembly**: Animate all 6 pyramids simultaneously flying into their mathematically perfect interlocking target coordinates using `self.play(*[MoveToTarget(p) ...])` over a slow, clear **8.0 seconds** run time.
 
 ---
 
 ## 4. UI Overlays & Camera Choreography
-* **Static Text Elements:** Use `.fix_in_frame()` to lock a 2D mathematical overlay in the Upper Left corner:
-  * Line 1: `MathTex(r"\sum_{k=1}^{N} k^2")`
-  * Line 2 (Delayed Reveal): `MathTex(r"= \frac{N(N+1)(2N+1)}{6}")`
-* **Dimension Labels:** Once the blocks are unified into a solid rectangular cuboid, spawn 3D `Line` braces or text labels showing the dimensions of the final box edges:
-  * Base Width = $N$
-  * Base Length = $N + 1$
-  * Height = $2N + 1$ (Note: Representing the full combined height cleanly before dividing by 6 mathematically).
-* **Camera Orbit:** Conclude the scene by executing a continuous camera rotation: `self.camera.animate.set_euler_angles(theta=150 * DEGREES, run_time=6, rate_func=linear)`. This ensures the AI generates an animation that proves there are zero empty spaces or overlap anomalies in the combined architecture.
+* **Formula Overlay**: Lock a 2D mathematical formula in the Upper Left corner:
+  * `\sum_{k=1}^{n} k^2 = \frac{n(n+1)(2n+1)}{6}`
+  * Fix this to the frame (`self.add_fixed_in_frame_mobjects(...)`) so it does not move in 3D space.
+* **Cinematic 360 Spin**: Once the blocks interlock into the unified solid box, rotate the camera in a full 360-degree circle (`theta = self.camera.get_theta() + 360 * DEGREES`) over a **10-second** duration with a linear rate modifier. This physically showcases the flawlessly packed, gap-free, and straight-edged solid cuboid from all angles.
+
