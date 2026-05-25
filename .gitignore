@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+
+# Manim cache & partials (keep final videos if needed, but ignore partials/Tex)
+**/partial_movie_files/
+media/Tex/
+media/texts/
+media/images/
