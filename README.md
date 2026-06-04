@@ -1,5 +1,7 @@
 # Mathematical Proof Visualization: Sum of Squares ($1^2 + 2^2 + \dots + n^2$)
 
+**Watch the full animated proof on YouTube:** [https://youtu.be/5t6f9zMn4jo](https://youtu.be/5t6f9zMn4jo)
+
 This repository contains a mathematically perfect 3D Manim animation demonstrating the geometric proof of the Sum of Squares formula:
 $$\sum_{k=1}^{n} k^2 = \frac{n(n+1)(2n+1)}{6}$$
 
@@ -15,6 +17,7 @@ All paths specified below are relative to the root of the workspace directory:
   - The finalized Python script containing the Manim animation definition. It builds $n=3$ step-pyramids and implements the exact mathematical transformations.
 - **Compiled Output**: `./media/videos/sum_of_squares/1080p60/SumOfSquaresProof.mp4`
   - The high-definition 60 FPS output video of the flawless 3D interlocking reassembly and 360-degree rotation.
+  - **YouTube Link**: [https://youtu.be/5t6f9zMn4jo](https://youtu.be/5t6f9zMn4jo)
 - **Dependency Definitions**: `./requirements.txt`
   - The locked dependencies (`manim` and `numpy`) required to execute the rendering script.
 

@@ -1,5 +1,7 @@
 # Technical Specification: 3D Proof-Without-Words Animation for Sum of Squares
 
+**YouTube Link:** [https://youtu.be/5t6f9zMn4jo](https://youtu.be/5t6f9zMn4jo)
+
 ## 1. Objective & Scene Setup
 * **Target Engine:** Manim (Community Edition)
 * **Class Name:** `SumOfSquaresProof`
